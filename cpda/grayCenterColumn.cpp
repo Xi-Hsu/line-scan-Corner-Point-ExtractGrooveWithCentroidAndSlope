@@ -251,7 +251,7 @@ bool detectStripe(const Mat& lightGray, int col, cv::Vec3i& wPos, int thresh)
 		w = 0;
 		++i;
 	}
-	if (maxW >= 3)//条纹宽度阈值
+	if (maxW >= 1)//条纹宽度阈值
 	{
 		wPos[0] = maxW;
 		wPos[1] = startPos;

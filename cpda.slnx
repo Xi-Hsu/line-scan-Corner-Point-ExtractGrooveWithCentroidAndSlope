@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="cpda/cpda.vcxproj" />
+  <Project Path="cpda/cpda.vcxproj" Id="5d1dc413-e282-46f5-bd19-e99d6081f171" />
 </Solution>
