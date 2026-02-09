@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="grayCenterColumn.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="grayCenterRow.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -28,6 +25,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="source.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="grayCenterColumn.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

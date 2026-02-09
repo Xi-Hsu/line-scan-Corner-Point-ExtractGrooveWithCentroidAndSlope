@@ -8,6 +8,24 @@
 #include<iostream>
 #include"grayCenterColumn.h"
 
+
+// 提取模式
+enum ExtractMode {
+    MODE_NORMAL,  // 普通灰度重心 sum(i*val)/sum(val)
+    MODE_SQUARED  // 平方加权重心 sum(i*val^2)/sum(val^2) - 对高光更敏感，线更细
+};
+
+/**
+ * @brief 鲁棒的激光中心提取函数 (峰值+局部窗口法)
+ * @param src 输入灰度图 (单通道)
+ * @param centerPoints 输出的亚像素中心点集合
+ * @param threshold 亮度阈值 (低于此亮度的峰值被忽略)
+ * @param scanWidth 局部计算窗口半径 (例如5，则计算峰值左右各5个像素)
+ * @param mode 提取模式 (普通或平方)
+ */
+void extractLaserCenterRobust(const cv::Mat& src, std::vector<cv::Point2f>& centerPoints,
+    int threshold = 50, int scanWidth = 10, ExtractMode mode = MODE_NORMAL);
+
 //************************************
 // Method:    getThreshInRow
 // FullName:  getThreshInRow

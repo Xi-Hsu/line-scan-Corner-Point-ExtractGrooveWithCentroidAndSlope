@@ -279,3 +279,86 @@ void weightCenter(Mat& srcImage, vector<Point2f>& centerPoints)
 	//平法加权灰度重心
 	grayCenterByRowSquare(threshed, centerPoints, CENTER_NOTHRESH);
 }
+void extractLaserCenterRobust(const cv::Mat& src, std::vector<cv::Point2f>& centerPoints,
+	int threshold, int scanWidth, ExtractMode mode)
+{
+	centerPoints.clear();
+	if (src.empty() || src.type() != CV_8UC1) {
+		return;
+	}
+
+	int rows = src.rows;
+	int cols = src.cols;
+
+	// 预留空间，避免push_back多次重新分配
+	centerPoints.reserve(rows);
+
+	// 逐行扫描
+	for (int i = 0; i < rows; ++i)
+	{
+		const uchar* ptr = src.ptr<uchar>(i);
+
+		// 1. 寻找当前行的最大值及其位置 (Peak Search)
+		// 这一步是为了抗噪，只关注最亮的区域
+		int maxVal = -1;
+		int maxIdx = -1;
+
+		// 简单的线性搜索找最大值 (也可以用 minMaxIdx，但在循环里手写往往更快)
+		for (int j = 0; j < cols; ++j) {
+			if (ptr[j] > maxVal) {
+				maxVal = ptr[j];
+				maxIdx = j;
+			}
+		}
+
+		// 2. 阈值筛选：如果该行最亮的地方都没超过阈值，说明没有激光
+		if (maxVal < threshold) {
+			continue;
+		}
+
+		// 3. 定义局部窗口 (ROI)
+		// 只在 maxIdx - scanWidth 到 maxIdx + scanWidth 范围内计算重心
+		int startCol = std::max(0, maxIdx - scanWidth);
+		int endCol = std::min(cols - 1, maxIdx + scanWidth);
+
+		double sumVal = 0.0;
+		double sumPos = 0.0;
+
+		// 4. 计算局部重心
+		if (mode == MODE_NORMAL)
+		{
+			for (int j = startCol; j <= endCol; ++j)
+			{
+				int val = ptr[j];
+				// 只有大于一定底噪的值才参与计算，进一步提高精度
+				// 这里可以简单的再次判断 > threshold 或者 > 0
+				if (val > threshold / 2) {
+					sumVal += val;
+					sumPos += (double)j * val;
+				}
+			}
+		}
+		else if (mode == MODE_SQUARED)
+		{
+			for (int j = startCol; j <= endCol; ++j)
+			{
+				int val = ptr[j];
+				if (val > threshold / 2) {
+					double valSq = (double)val * val;
+					sumVal += valSq;
+					sumPos += (double)j * valSq;
+				}
+			}
+		}
+
+		// 5. 存储结果
+		if (sumVal > 1e-5) { // 避免除以0
+			float centerX = static_cast<float>(sumPos / sumVal);
+
+			// 简单的亚像素坐标约束：重心不应该跑出窗口太远
+			if (abs(centerX - maxIdx) <= scanWidth) {
+				centerPoints.push_back(Point2f(centerX, static_cast<float>(i)));
+			}
+		}
+	}
+}
